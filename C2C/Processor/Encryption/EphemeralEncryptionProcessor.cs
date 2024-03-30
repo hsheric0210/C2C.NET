@@ -4,6 +4,13 @@ using System.Security.Cryptography;
 
 namespace C2C.Processor.Encryption
 {
+    /// <summary>
+    /// Encrypts the data or payload, making the MITM attack impossible.
+    /// The encryption key is generated while handshaking with ECDH.
+    /// </summary>
+    /// <remarks>
+    /// https://en.wikipedia.org/wiki/Ephemeral_key
+    /// </remarks>
     public class EphemeralEncryptionProcessor : IProcessor
     {
         private ECDiffieHellman ecdh;

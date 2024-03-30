@@ -4,8 +4,4 @@
         <TargetFrameworks>net462;net6</TargetFrameworks>
     </PropertyGroup>
 
-    <ItemGroup>
-        <Folder Include="Processor\Compression\" />
-    </ItemGroup>
-
 </Project>

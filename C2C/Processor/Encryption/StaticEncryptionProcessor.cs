@@ -3,6 +3,13 @@ using System;
 
 namespace C2C.Processor.Encryption
 {
+    /// <summary>
+    /// Encrypts the data or payload, making the MITM attack impossible.
+    /// You should manually specify the static encryption key.
+    /// </summary>
+    /// <remarks>
+    /// https://en.wikipedia.org/wiki/Static_key
+    /// </remarks>
     public class StaticEncryptionProcessor : IProcessor
     {
         private readonly IEncryptScheme scheme;
