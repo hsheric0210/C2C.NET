@@ -1,19 +1,25 @@
 ﻿using System;
 using System.Security.Cryptography;
 
-namespace C2C.DataProcessor.Protection
+namespace C2C.Processor.Encryption.Scheme
 {
-    public abstract class SymmetricAlgorithmProtect : IDataProtect
+    public abstract class SymmetricAlgorithmScheme : IEncryptScheme
     {
         // No need to dispose; it doesn't have actual key or iv
         private readonly SymmetricAlgorithm algorithm;
+        private readonly byte[] keyDeriveSalt;
+        private readonly int keyDeriveIteration;
 
-        private byte[] key;
+        private byte[] encryptionKey;
         private bool disposedValue;
 
-        protected SymmetricAlgorithmProtect(SymmetricAlgorithm algorithm)
+        protected SymmetricAlgorithmScheme(SymmetricAlgorithm algorithm, int keySize, byte[] keyDeriveSalt, int keyDeriveIteration)
         {
             this.algorithm = algorithm;
+            this.keyDeriveSalt = keyDeriveSalt;
+            this.keyDeriveIteration = keyDeriveIteration;
+
+            this.algorithm.KeySize = keySize;
             this.algorithm.Mode = CipherMode.CBC;
             this.algorithm.Padding = PaddingMode.ISO10126;
         }
@@ -26,7 +32,7 @@ namespace C2C.DataProcessor.Protection
             using (var rng = RandomNumberGenerator.Create())
                 rng.GetBytes(iv);
 
-            using (var encrypt = algorithm.CreateEncryptor(key, iv))
+            using (var encrypt = algorithm.CreateEncryptor(encryptionKey, iv))
             {
                 // Do encrypt the data
                 var cipherText = encrypt.TransformFinalBlock(data, 0, data.Length);
@@ -47,12 +53,17 @@ namespace C2C.DataProcessor.Protection
             var iv = new byte[algorithm.BlockSize];
             Buffer.BlockCopy(data, 0, iv, 0, iv.Length);
 
-            using (var decrypt = algorithm.CreateDecryptor(key, iv))
+            using (var decrypt = algorithm.CreateDecryptor(encryptionKey, iv))
                 return decrypt.TransformFinalBlock(data, iv.Length, data.Length - iv.Length);
         }
 
         /// <inheritdoc/>
-        public void UpdateKey(byte[] key) => this.key = key;
+        public void UpdateSecret(byte[] secret)
+        {
+            // Key stretching
+            var pbkdf2 = new Rfc2898DeriveBytes(secret, keyDeriveSalt, keyDeriveIteration);
+            encryptionKey = pbkdf2.GetBytes(algorithm.KeySize);
+        }
 
         protected virtual void Dispose(bool disposing)
         {
@@ -62,8 +73,8 @@ namespace C2C.DataProcessor.Protection
                 {
                     algorithm.Dispose();
 
-                    Array.Clear(key, 0, key.Length);
-                    key = null;
+                    Array.Clear(encryptionKey, 0, encryptionKey.Length);
+                    encryptionKey = null;
                 }
 
                 disposedValue = true;

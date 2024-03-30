@@ -1,8 +1,8 @@
 ﻿using System;
 
-namespace C2C.DataProcessor.Protection
+namespace C2C.Processor.Encryption.Scheme
 {
-    internal interface IDataProtect : IDisposable
+    public interface IEncryptScheme : IDisposable
     {
         /// <summary>
         /// Encrypts the specified data BLOB.
@@ -19,9 +19,9 @@ namespace C2C.DataProcessor.Protection
         byte[] Decrypt(byte[] data);
 
         /// <summary>
-        /// Update the encryption key.
+        /// Update the encryption secret.
         /// </summary>
-        /// <param name="key">The new encryption key.</param>
-        void UpdateKey(byte[] key);
+        /// <param name="secret">The new encryption secret.</param>
+        void UpdateSecret(byte[] secret);
     }
 }

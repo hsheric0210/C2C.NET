@@ -1,6 +1,6 @@
-﻿namespace C2C.DataProcessor.Protection
+﻿namespace C2C.Processor.Encryption.Scheme
 {
-    public class NullProtect : IDataProtect
+    public class NullScheme : IEncryptScheme
     {
         /// <inheritdoc/>
         public byte[] Encrypt(byte[] data) => data;
@@ -12,7 +12,7 @@
         public void UpdateIV(byte[] iv) { }
 
         /// <inheritdoc/>
-        public void UpdateKey(byte[] key) { }
+        public void UpdateSecret(byte[] key) { }
 
         /// <inheritdoc/>
         public void Dispose() { }
