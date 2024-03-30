@@ -13,12 +13,18 @@ using System.Threading.Tasks;
 
 namespace C2C
 {
-    public class C2Channel : IDisposable
+    public class C2Channel : IChannel
     {
+        /// <inheritdoc/>
         public bool CanReceive => medium.CanReceive;
+
+        /// <inheritdoc/>
         public bool CanTransmit => medium.CanTransmit;
 
+        /// <inheritdoc/>
         public Guid ChannelId { get; }
+
+        /// <inheritdoc/>
         public Guid SessionId { get; }
 
         public event EventHandler<HandshakeEventArgs> OnHandshake;
@@ -38,6 +44,16 @@ namespace C2C
         private readonly ConcurrentDictionary<Guid, TaskCompletionSource<byte[]>> receiveHandlerQueue
             = new ConcurrentDictionary<Guid, TaskCompletionSource<byte[]>>();
 
+        /// <summary>
+        /// Creates a C2 channel.
+        /// </summary>
+        /// <param name="channelId">Unique identifier for this kind of communication channels. (Each program or project should have distinctive channel ID)</param>
+        /// <param name="sessionId">Unique identifier for this specific channel session.</param>
+        /// <param name="medium">Medium to communicate with.</param>
+        /// <param name="encoder">Message packet encoder to use.</param>
+        /// <param name="handshakeGenerator">Handshake packet generator to use in handshaking phase.</param>
+        /// <param name="handshakeEncoder">Handshake packet encoder to use in handshaking phase.</param>
+        /// <param name="processors">A list of processors to use. Only processors that are supported by both server and client will be actually enabled.</param>
         public C2Channel(Guid channelId, Guid sessionId, IMedium medium, IMessageEncoder encoder, IHandshakeGenerator handshakeGenerator, IHandshakeEncoder handshakeEncoder, IProcessor[] processors)
         {
             SessionId = sessionId;
@@ -91,6 +107,7 @@ namespace C2C
             });
         }
 
+        /// <inheritdoc/>
         public void Transmit(Guid messageId, byte[] data)
         {
             Task.Run(() =>
@@ -106,12 +123,14 @@ namespace C2C
             });
         }
 
-        public async Task<byte[]> Transceive(Guid messageId, byte[] buffer, TimeSpan timeout)
+        /// <inheritdoc/>
+        public async Task<byte[]> Transceive(Guid messageId, byte[] data, TimeSpan timeout)
         {
-            Transmit(messageId, buffer);
+            Transmit(messageId, data);
             return await WaitForResponse(messageId, timeout);
         }
 
+        /// <inheritdoc/>
         public async Task<byte[]> WaitForResponse(Guid messageId, TimeSpan timeout)
         {
             var tcs = new TaskCompletionSource<byte[]>();
@@ -127,6 +146,7 @@ namespace C2C
             });
         }
 
+        /// <inheritdoc/>
         public async Task Open(TimeSpan timeout)
         {
             medium.Open(timeout);
