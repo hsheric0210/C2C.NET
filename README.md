@@ -30,8 +30,9 @@ If you chose to use high-level transmission protocols, C2C.NET will automaticall
 
 * [x] HTTP
 
-    To run HTTP server (http-bind), you must run `netsh http add urlacl url=http://+:{port}/ user={domain}\{username}` to reserve URL namespace.
-    Replace the `{port}`, `{domain}`, `{username}` to your desired port number, computor name, and user account name.
+    To run HTTP server (http-bind), you must run `netsh http add urlacl url=http://+:{port}/ user={domain}\{username}` to reserve URL namespace. (Or you will receive 'Access Denied' error)
+
+    Replace the `{port}`, `{domain}`, `{username}` placeholder to your desired port number, computor name, and user account name.
 
     To delete URL namespace reservation, run `netsh http remove urlacl url=http://+:{port}/`.
 

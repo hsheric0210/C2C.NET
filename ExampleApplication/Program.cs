@@ -19,7 +19,7 @@ namespace ExampleApplication
     {
         class Options
         {
-            [Option('t', "type", Required = true, Default = "tcp_bind", HelpText = "Communication medium type; supported media: tcp_bind, tcp_connect")]
+            [Option('t', "type", Required = true, Default = "tcp_bind", HelpText = "Communication medium type; supported media: tcp_bind, tcp_connect, http_bind, http_connect, ws_bind, ws_connect")]
             public string MediumType { get; set; }
 
             [Option('c', "channel-id", Required = false, Default = "320DF748-D5BC-4778-988A-86E92C2E60C8", HelpText = "Communication channel ID.")]
@@ -78,6 +78,20 @@ namespace ExampleApplication
                     if (!Uri.TryCreate(options.Address, new UriCreationOptions { DangerousDisablePathAndQueryCanonicalization = false }, out var uri))
                         throw new ArgumentException(options.Address + " is not a valid URI");
                     medium = new HttpConnect(uri, TimeSpan.FromSeconds(3));
+                    break;
+                }
+                case "ws_bind":
+                {
+                    Console.WriteLine("[+] Using WebSocket Bind mode.");
+                    medium = new WebSocketBind(new string[] { options.Address });
+                    break;
+                }
+                case "ws_connect":
+                {
+                    Console.WriteLine("[+] Using WebSocket Connect mode.");
+                    if (!Uri.TryCreate(options.Address, new UriCreationOptions { DangerousDisablePathAndQueryCanonicalization = false }, out var uri))
+                        throw new ArgumentException(options.Address + " is not a valid URI");
+                    medium = new WebSocketConnect(uri);
                     break;
                 }
                 default:

@@ -24,9 +24,10 @@ namespace C2C.Medium.Tcp
 
         public TcpConnect(IPEndPoint address)
         {
+            this.address = address;
+
             client = new TcpClient();
             cancelToken = new CancellationTokenSource();
-            this.address = address;
         }
 
         public event EventHandler<RawPacketEventArgs> OnReceive;
