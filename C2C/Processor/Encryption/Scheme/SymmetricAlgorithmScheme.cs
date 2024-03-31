@@ -7,6 +7,7 @@ namespace C2C.Processor.Encryption.Scheme
     {
         // No need to dispose; it doesn't have actual key or iv
         private readonly SymmetricAlgorithm algorithm;
+
         private readonly byte[] keyDeriveSalt;
         private readonly int keyDeriveIteration;
 

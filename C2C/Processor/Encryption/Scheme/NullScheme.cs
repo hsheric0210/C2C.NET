@@ -9,12 +9,15 @@
         public byte[] Decrypt(byte[] data) => data;
 
         /// <inheritdoc/>
-        public void UpdateIV(byte[] iv) { }
+        public void UpdateIV(byte[] iv)
+        { }
 
         /// <inheritdoc/>
-        public void UpdateSecret(byte[] key) { }
+        public void UpdateSecret(byte[] key)
+        { }
 
         /// <inheritdoc/>
-        public void Dispose() { }
+        public void Dispose()
+        { }
     }
 }

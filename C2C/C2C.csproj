@@ -4,4 +4,8 @@
         <TargetFrameworks>net462;net6</TargetFrameworks>
     </PropertyGroup>
 
+    <ItemGroup>
+      <Folder Include="Medium\Http\" />
+    </ItemGroup>
+
 </Project>

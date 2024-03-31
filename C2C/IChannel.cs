@@ -22,7 +22,6 @@ namespace C2C
         /// </summary>
         Guid ChannelId { get; }
 
-
         /// <summary>
         /// Called when the incoming handshake packet is received.
         /// </summary>

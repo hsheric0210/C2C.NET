@@ -14,7 +14,8 @@ namespace C2C.Processor.Compression
 
         public byte[] GetNegotationData() => Array.Empty<byte>();
 
-        public void FinishNegotiate(byte[] negotiationData) { }
+        public void FinishNegotiate(byte[] negotiationData)
+        { }
 
         public byte[] ProcessIncomingData(byte[] data)
         {

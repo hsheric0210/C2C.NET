@@ -24,7 +24,8 @@ namespace C2C.Processor.Encryption
         public byte[] GetNegotationData() => Array.Empty<byte>();
 
         /// <inheritdoc/>
-        public void FinishNegotiate(byte[] negotiationData) { }
+        public void FinishNegotiate(byte[] negotiationData)
+        { }
 
         /// <inheritdoc/>
         public byte[] ProcessIncomingData(byte[] data) => scheme.Decrypt(data);

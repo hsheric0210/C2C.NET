@@ -15,7 +15,6 @@ namespace C2C.Message.Encoder
             using (var stream = new MemoryStream())
             using (var writer = new BinaryWriter(stream))
             {
-
                 writer.Write(messageId.ToByteArray());
 
                 using (var sha256 = SHA256.Create())

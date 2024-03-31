@@ -11,7 +11,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace C2C
@@ -32,6 +31,7 @@ namespace C2C
         public Guid ChannelId { get; }
 
         public event EventHandler<DataEventArgs> OnHandshake;
+
         public event EventHandler<DataEventArgs> OnReceive;
 
         private readonly IMedium medium;

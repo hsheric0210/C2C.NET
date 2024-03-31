@@ -1,6 +1,6 @@
-﻿using System;
+﻿using C2C.Processor;
+using System;
 using System.IO;
-using C2C.Processor;
 
 namespace C2C.Handshake.Encoder
 {
