@@ -4,7 +4,7 @@ using C2C.Processor;
 
 namespace C2C.Handshake.Encoder
 {
-    internal class C2HandshakeEncoder : IHandshakeEncoder
+    public class C2HandshakeEncoder : IHandshakeEncoder
     {
         public byte[] Encode(Guid channelId, IProcessor[] processors)
         {

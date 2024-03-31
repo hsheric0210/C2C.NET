@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
@@ -10,7 +9,7 @@ namespace C2C.Medium.Tcp
     public class TcpBind : IMedium
     {
         private TcpListener listener;
-        private HashSet<TcpClient> clients = new HashSet<TcpClient>();
+        private TcpClient client;
         private bool disposedValue;
 
         private readonly CancellationTokenSource cancelToken;
@@ -22,60 +21,63 @@ namespace C2C.Medium.Tcp
 
         public bool CanTransmit => true;
 
-        public TcpBind(IPAddress ip, int port, int readBufferSize)
+        public bool Connected => client?.Connected == true;
+
+        public TcpBind(IPEndPoint address, int readBufferSize)
         {
-            listener = new TcpListener(ip, port);
+            listener = new TcpListener(address);
             cancelToken = new CancellationTokenSource();
             this.readBufferSize = readBufferSize;
         }
 
         public event EventHandler<RawPacketEventArgs> OnReceive;
 
-        public void Open(TimeSpan timeout)
+        public Task Open()
         {
             listener.Start();
 
             // Connection Accept Thread
-            Task.Run(() =>
+            return Task.Run(() =>
             {
-                while (!cancelToken.IsCancellationRequested)
+                while (!listener.Pending())
+                    Task.Delay(100).Wait(); // Wait 100ms before retrying
+
+                client = listener.AcceptTcpClient();
+                Logging.Log("Pending connection accepted.");
+
+                // Socket Reader Thread
+                Task.Run(() =>
                 {
-                    if (!listener.Pending())
+                    Logging.Log("Reader thread started.");
+                    var stream = client.GetStream();
+                    while (!cancelToken.IsCancellationRequested)
                     {
-                        Task.Delay(100); // Wait 100ms before retrying
-                        continue;
-                    }
-
-                    var client = listener.AcceptTcpClient();
-                    clients.Add(client);
-
-                    // Socket Reader Thread
-                    Task.Run(() =>
-                    {
-                        var stream = client.GetStream();
-                        while (!cancelToken.IsCancellationRequested)
+                        if (!client.Connected)
                         {
-                            if (!stream.DataAvailable)
-                                continue;
-
-                            var readBuffer = new byte[readBufferSize];
-                            stream.Read(readBuffer, 0, readBufferSize);
-                            OnReceive(this, new RawPacketEventArgs(readBuffer));
-
-                            while (stream.DataAvailable) // More data is available (the packet size exceeds the buffer size -> cannot handle; drop)
-                                stream.Read(readBuffer, 0, readBufferSize);
+                            Logging.Log("Client connection lost.");
+                            break;
                         }
-                    });
-                }
+
+                        while (stream.DataAvailable)
+                        {
+                            var available = client.Available;
+                            var readBuffer = new byte[available];
+                            var read = stream.Read(readBuffer, 0, available);
+                            Logging.Log("Received {0} bytes out of {1} available bytes.", read, available);
+
+                            OnReceive(this, new RawPacketEventArgs(readBuffer));
+                        }
+
+                        Task.Delay(100).Wait(); // Wait 10ms before reading next data
+                    }
+                });
             });
         }
 
         public void Transmit(byte[] buffer)
         {
-            foreach (var client in clients)
-            {
-                client.GetStream().Write(buffer, 0, buffer.Length);
-            }
+            Logging.Log("Transmit data: {0} bytes", buffer.Length);
+            client.GetStream().Write(buffer, 0, buffer.Length);
         }
 
         protected virtual void Dispose(bool disposing)
@@ -86,12 +88,11 @@ namespace C2C.Medium.Tcp
                 {
                     cancelToken.Cancel();
                     listener.Stop();
-                    foreach (var client in clients)
-                        client.Dispose();
+                    client.Dispose();
                 }
 
                 listener = null;
-                clients = null;
+                client = null;
                 disposedValue = true;
             }
         }

@@ -28,7 +28,7 @@ namespace C2C.Processor.Encryption.Scheme
         public byte[] Encrypt(byte[] data)
         {
             // Generate IV
-            var iv = new byte[algorithm.BlockSize];
+            var iv = new byte[algorithm.BlockSize / 8];
             using (var rng = RandomNumberGenerator.Create())
                 rng.GetBytes(iv);
 
@@ -50,7 +50,7 @@ namespace C2C.Processor.Encryption.Scheme
         public byte[] Decrypt(byte[] data)
         {
             // Read the IV header
-            var iv = new byte[algorithm.BlockSize];
+            var iv = new byte[algorithm.BlockSize / 8];
             Buffer.BlockCopy(data, 0, iv, 0, iv.Length);
 
             using (var decrypt = algorithm.CreateDecryptor(encryptionKey, iv))
@@ -62,7 +62,7 @@ namespace C2C.Processor.Encryption.Scheme
         {
             // Key stretching
             var pbkdf2 = new Rfc2898DeriveBytes(secret, keyDeriveSalt, keyDeriveIteration);
-            encryptionKey = pbkdf2.GetBytes(algorithm.KeySize);
+            encryptionKey = pbkdf2.GetBytes(algorithm.KeySize / 8);
         }
 
         protected virtual void Dispose(bool disposing)

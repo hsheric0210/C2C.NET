@@ -4,20 +4,13 @@ namespace C2C
 {
     public class DataEventArgs : EventArgs
     {
-        public DataEventArgs(byte[] data) => Data = data;
-
-        public byte[] Data { get; }
-    }
-
-    public class HandshakeEventArgs : EventArgs
-    {
-        public HandshakeEventArgs(Guid sessionId, byte[] data)
+        public DataEventArgs(Guid messageId, byte[] data)
         {
-            SessionId = sessionId;
+            MessageID = messageId;
             Data = data;
         }
 
-        public Guid SessionId { get; }
+        public Guid MessageID { get; }
         public byte[] Data { get; }
     }
 }

@@ -15,11 +15,10 @@ namespace C2C.Message.Encoder
         /// <summary>
         /// Encodes the given data to a message packet.
         /// </summary>
-        /// <param name="sessionId">The client UUID.</param>
-        /// <param name="sessionId">The message UUID.</param>
+        /// <param name="messageId">The message UUID.</param>
         /// <param name="data">The data/payload.</param>
         /// <returns></returns>
-        byte[] Encode(Guid sessionId, Guid messageId, byte[] data);
+        byte[] Encode(Guid messageId, byte[] data);
 
         /// <summary>
         /// Decodes the raw data byte-array just received from the network to managed <c>MessageData</c> struct.

@@ -19,9 +19,10 @@ namespace C2C.Processor.Compression
         public byte[] ProcessIncomingData(byte[] data)
         {
             using (var outStream = new MemoryStream())
-            using (var gzStream = new GZipStream(outStream, CompressionMode.Decompress))
+            using (var inStream = new MemoryStream(data))
+            using (var gzStream = new GZipStream(inStream, CompressionMode.Decompress))
             {
-                gzStream.Write(data, 0, data.Length);
+                gzStream.CopyTo(outStream);
                 return outStream.ToArray();
             }
         }
@@ -32,6 +33,7 @@ namespace C2C.Processor.Compression
             using (var gzStream = new GZipStream(outStream, CompressionLevel.Optimal))
             {
                 gzStream.Write(data, 0, data.Length);
+                gzStream.Flush();
                 return outStream.ToArray();
             }
         }

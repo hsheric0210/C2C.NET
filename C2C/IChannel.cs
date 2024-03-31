@@ -15,20 +15,18 @@ namespace C2C
         /// </summary>
         bool CanTransmit { get; }
 
+        bool Connected { get; }
+
         /// <summary>
         /// Channel ID of this channel instance.
         /// </summary>
         Guid ChannelId { get; }
 
-        /// <summary>
-        /// Session ID of this channel instance.
-        /// </summary>
-        Guid SessionId { get; }
 
         /// <summary>
         /// Called when the incoming handshake packet is received.
         /// </summary>
-        event EventHandler<HandshakeEventArgs> OnHandshake;
+        event EventHandler<DataEventArgs> OnHandshake;
 
         /// <summary>
         /// Called when a message is received from the server.
@@ -64,6 +62,6 @@ namespace C2C
         /// </summary>
         /// <param name="timeout">Timeout to wait for the server.</param>
         /// <exception cref="IOException">Thrown when the channel ID is differ from server's one.</exception>
-        Task Open(TimeSpan timeout);
+        Task Open();
     }
 }

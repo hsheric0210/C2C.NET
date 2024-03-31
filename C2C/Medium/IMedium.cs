@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 
 namespace C2C.Medium
 {
@@ -10,9 +11,11 @@ namespace C2C.Medium
 
         bool CanTransmit { get; }
 
+        bool Connected { get; }
+
         event EventHandler<RawPacketEventArgs> OnReceive;
 
-        void Open(TimeSpan timeout);
+        Task Open();
 
         void Transmit(byte[] buffer);
     }

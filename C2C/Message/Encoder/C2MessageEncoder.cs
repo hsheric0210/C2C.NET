@@ -10,19 +10,18 @@ namespace C2C.Message.Encoder
         public int GetPacketSize(int dataLength) => dataLength + 68;
 
         /// <inheritdoc/>
-        public byte[] Encode(Guid sessionId, Guid messageId, byte[] data)
+        public byte[] Encode(Guid messageId, byte[] data)
         {
             using (var stream = new MemoryStream())
             using (var writer = new BinaryWriter(stream))
             {
 
-                writer.Write(sessionId.ToByteArray());
                 writer.Write(messageId.ToByteArray());
 
                 using (var sha256 = SHA256.Create())
                 {
                     var hash = sha256.ComputeHash(data);
-                    writer.Write((short)sha256.HashSize);
+                    writer.Write((byte)hash.Length);
                     writer.Write(hash);
                 }
 
@@ -44,16 +43,15 @@ namespace C2C.Message.Encoder
         {
             using (var reader = new BinaryReader(stream))
             {
-                var sessionId = new Guid(reader.ReadBytes(16));
                 var messageId = new Guid(reader.ReadBytes(16));
 
-                var dataHashSize = reader.ReadInt16();
+                var dataHashSize = reader.ReadByte();
                 var dataHash = reader.ReadBytes(dataHashSize);
 
                 var dataLength = reader.ReadInt32();
                 var data = reader.ReadBytes(dataLength);
 
-                return new C2MessagePacket(sessionId, messageId, dataHash, data);
+                return new C2MessagePacket(messageId, dataHash, data);
             }
         }
     }
