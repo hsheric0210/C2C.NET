@@ -222,27 +222,5 @@ namespace C2C
             // Negotiation finished; enable processors
             enableProcessors = true;
         }
-
-        protected virtual void Dispose(bool disposing)
-        {
-            if (!disposedValue)
-            {
-                if (disposing)
-                {
-                    medium.Dispose();
-                }
-
-                processors = null;
-                processorsReversed = null;
-
-                disposedValue = true;
-            }
-        }
-
-        public void Dispose()
-        {
-            Dispose(disposing: true);
-            GC.SuppressFinalize(this);
-        }
     }
 }

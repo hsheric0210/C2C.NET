@@ -14,6 +14,9 @@ Will both support P2P and Centralized C2 server model. Currently aiming on Centr
 All protocol supports both Bind(Server) and Connect(Client) mode.
 (e.g. tcp-bind, tcp-connect)
 
+In case of Duplex Channel usage, one side should be 'Bind(Server)' and the other side should be 'Connect(Client)'.
+(No 'bind-bind' or 'connect-connect' communication is possible; only 'bind-connect' form is allowed)
+
 #### Sockets
 
 * [x] TCP
@@ -25,8 +28,17 @@ All protocol supports both Bind(Server) and Connect(Client) mode.
 
 If you chose to use high-level transmission protocols, C2C.NET will automatically *conceal* the data inside the legitimate-looking traffic. (like Steganography)
 
-* [ ] HTTP(S) (HTTPS with whitelisted cert fingerprint)
-* [ ] FTP(S) (HTTPS with whitelisted cert fingerprint)
+* [x] HTTP
+
+    To run HTTP server (http-bind), you must run `netsh http add urlacl url=http://+:{port}/ user={domain}\{username}` to reserve URL namespace.
+    Replace the `{port}`, `{domain}`, `{username}` to your desired port number, computor name, and user account name.
+
+    To delete URL namespace reservation, run `netsh http remove urlacl url=http://+:{port}/`.
+
+* [ ] HTTPS (pinned certificate)
+
+* [ ] FTP
+* [ ] FTPS (pinned certificate)
 * [ ] DNS
 
 ### Public Services

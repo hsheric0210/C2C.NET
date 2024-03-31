@@ -5,7 +5,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <Folder Include="Medium\Http\" />
+      <Reference Include="System.Net.Http" />
     </ItemGroup>
 
 </Project>

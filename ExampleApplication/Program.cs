@@ -3,6 +3,7 @@ using C2C.Handshake;
 using C2C.Handshake.Encoder;
 using C2C.Handshake.Generator;
 using C2C.Medium;
+using C2C.Medium.Http;
 using C2C.Medium.Tcp;
 using C2C.Message.Encoder;
 using C2C.Processor;
@@ -54,7 +55,7 @@ namespace ExampleApplication
                     Console.WriteLine("[+] Using TCP Bind mode.");
                     if (!IPEndPoint.TryParse(options.Address, out var address))
                         throw new ArgumentException(options.Address + " is not a valid ip endpoint");
-                    medium = new TcpBind(address, 32768);
+                    medium = new TcpBind(address);
                     break;
                 }
                 case "tcp_connect":
@@ -62,7 +63,21 @@ namespace ExampleApplication
                     Console.WriteLine("[+] Using TCP Connect mode.");
                     if (!IPEndPoint.TryParse(options.Address, out var address))
                         throw new ArgumentException(options.Address + " is not a valid ip endpoint");
-                    medium = new TcpConnect(address, 32768);
+                    medium = new TcpConnect(address);
+                    break;
+                }
+                case "http_bind":
+                {
+                    Console.WriteLine("[+] Using HTTP Bind mode.");
+                    medium = new HttpBind(new string[] { options.Address });
+                    break;
+                }
+                case "http_connect":
+                {
+                    Console.WriteLine("[+] Using HTTP Connect mode.");
+                    if (!Uri.TryCreate(options.Address, new UriCreationOptions { DangerousDisablePathAndQueryCanonicalization = false }, out var uri))
+                        throw new ArgumentException(options.Address + " is not a valid URI");
+                    medium = new HttpConnect(uri, TimeSpan.FromSeconds(3));
                     break;
                 }
                 default:
@@ -72,39 +87,38 @@ namespace ExampleApplication
             var processors = new IProcessor[2];
             processors[0] = new GZipCompressionProcessor();
             processors[1] = new EphemeralEncryptionProcessorCng(new AesScheme());
-            using (var channel = new C2Channel(channelId, medium, new C2MessageEncoder(), new C2HandshakeGenerator(), new C2HandshakeEncoder(), processors))
+            var channel = new C2Channel(channelId, medium, new C2MessageEncoder(), new C2HandshakeGenerator(), new C2HandshakeEncoder(), processors);
+            channel.OnReceive += Channel_OnReceive;
+
+            Console.WriteLine("[+] Waiting for the channel to open...");
+            await channel.Open();
+            Console.WriteLine("[+] Connected! (Type '!exit' to end session)");
+
+            while (true)
             {
-                channel.OnReceive += Channel_OnReceive;
-                Console.WriteLine("[+] Waiting for the channel to open... (timeout is 30 seconds)");
-                await channel.Open();
-                Console.WriteLine("[+] Connected! (Type '!exit' to end session)");
+                var command = Console.ReadLine();
+                if (string.IsNullOrWhiteSpace(command))
+                    continue;
 
-                while (true)
+                if (command.Equals("!exit"))
                 {
-                    var command = Console.ReadLine();
-                    if (string.IsNullOrWhiteSpace(command))
-                        continue;
-
-                    if (command.Equals("!exit"))
-                    {
-                        Console.WriteLine("[+] Closing the session...");
-                        break;
-                    }
-
-                    if (!channel.Connected)
-                    {
-                        Console.WriteLine("[-] Connection lost.");
-                        break;
-                    }
-
-                    var timeStamp = DateTime.Now;
-                    var data = MessagePacketEncoder.Encode(timeStamp, command);
-                    channel.Transmit(commMessageId, data);
-                    Console.WriteLine("sent@{0} : {1}", timeStamp, command);
+                    Console.WriteLine("[+] Closing the session...");
+                    break;
                 }
 
-                channel.OnReceive -= Channel_OnReceive;
+                if (!channel.Connected)
+                {
+                    Console.WriteLine("[-] Connection lost.");
+                    break;
+                }
+
+                var timeStamp = DateTime.Now;
+                var data = MessagePacketEncoder.Encode(timeStamp, command);
+                channel.Transmit(commMessageId, data);
+                Console.WriteLine("sent@{0} : {1}", timeStamp, command);
             }
+
+            channel.OnReceive -= Channel_OnReceive;
             medium.Dispose();
         }
 

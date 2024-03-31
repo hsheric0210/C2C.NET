@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 
 namespace C2C
 {
-    public interface IChannel : IDisposable
+    public interface IChannel
     {
         /// <summary>
         /// Can this channel able to receive the message from the server?
