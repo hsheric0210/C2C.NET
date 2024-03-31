@@ -13,7 +13,6 @@ namespace C2C.Medium.Tcp
         private bool disposedValue;
 
         private readonly CancellationTokenSource cancelToken;
-        private readonly int readBufferSize;
 
         public Guid MediumID => Guid.Parse("76613C01-640A-4550-88A7-DA174BF21163");
 
@@ -23,11 +22,10 @@ namespace C2C.Medium.Tcp
 
         public bool Connected => client?.Connected == true;
 
-        public TcpBind(IPEndPoint address, int readBufferSize)
+        public TcpBind(IPEndPoint address)
         {
             listener = new TcpListener(address);
             cancelToken = new CancellationTokenSource();
-            this.readBufferSize = readBufferSize;
         }
 
         public event EventHandler<RawPacketEventArgs> OnReceive;

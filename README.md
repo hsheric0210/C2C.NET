@@ -9,25 +9,25 @@ Will both support P2P and Centralized C2 server model. Currently aiming on Centr
 
 ## Supported communication protocols
 
-### Low-level Sockets
+### Duplex
 
-* [ ] TCP
-* [ ] UDP
+All protocol supports both Bind(Server) and Connect(Client) mode.
+(e.g. tcp-bind, tcp-connect)
 
-### High-level Sockets
+#### Sockets
 
-If you chose to use high-level transmission protocols, C2C.NET will automatically *conceal* the data inside the legitimate-looking traffic. (like Steganography)
+* [x] TCP
+* [ ] WebSocket (Similar to HTTP)
+* [ ] Telnet
+* [ ] SSH
 
 #### Request-Response
+
+If you chose to use high-level transmission protocols, C2C.NET will automatically *conceal* the data inside the legitimate-looking traffic. (like Steganography)
 
 * [ ] HTTP(S) (HTTPS with whitelisted cert fingerprint)
 * [ ] FTP(S) (HTTPS with whitelisted cert fingerprint)
 * [ ] DNS
-
-#### Duplex
-
-* [ ] WebSocket (Similar to HTTP)
-* [ ] SSH
 
 ### Public Services
 
