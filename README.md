@@ -17,25 +17,31 @@ All protocol supports both Bind(Server) and Connect(Client) mode.
 In case of Duplex Channel usage, one side should be 'Bind(Server)' and the other side should be 'Connect(Client)'.
 (No 'bind-bind' or 'connect-connect' communication is possible; only 'bind-connect' form is allowed)
 
+#### When using HTTP or WebSocket
+
+The HTTP server (http_bind and ws_bind) implementation is based on **HTTP.sys**.
+
+This means that you must run `netsh http add urlacl url=http://+:{port}/ user={domain}\{username}` to reserve URL namespace. (Or you will receive 'Access Denied' error)
+
+Replace the `{port}`, `{domain}`, `{username}` placeholder to your desired port number, computor name, and user account name.
+
+To delete URL namespace reservation, run `netsh http remove urlacl url=http://+:{port}/`.
+
+Learn more information about this: <https://learn.microsoft.com/ko-kr/windows-server/networking/technologies/netsh/netsh-http>
+
 #### Sockets
 
 * [x] TCP
-* [ ] WebSocket (Similar to HTTP)
-* [ ] Telnet
+* UDP - Not supported because of its low confidence
+* [x] WebSocket (Similar to HTTP)
+* Telnet - It is just a simple wrapper over the TCP socket
 * [ ] SSH
 
 #### Request-Response
 
-If you chose to use high-level transmission protocols, C2C.NET will automatically *conceal* the data inside the legitimate-looking traffic. (like Steganography)
+* [ ] TODO: If you chose to use high-level transmission protocols, C2C.NET will automatically *conceal* the data inside the legitimate-looking traffic. (like Steganography)
 
 * [x] HTTP
-
-    To run HTTP server (http-bind), you must run `netsh http add urlacl url=http://+:{port}/ user={domain}\{username}` to reserve URL namespace. (Or you will receive 'Access Denied' error)
-
-    Replace the `{port}`, `{domain}`, `{username}` placeholder to your desired port number, computor name, and user account name.
-
-    To delete URL namespace reservation, run `netsh http remove urlacl url=http://+:{port}/`.
-
 * [ ] HTTPS (pinned certificate)
 
 * [ ] FTP
