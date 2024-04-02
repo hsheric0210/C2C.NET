@@ -13,6 +13,8 @@ namespace C2C.Medium.Tcp
 
         private readonly CancellationTokenSource cancelToken;
         private readonly IPEndPoint address;
+        private readonly TimeSpan connectionCheckPeriod;
+        private readonly TimeSpan readPeriod;
 
         public Guid MediumID => Guid.Parse("B7DFA60A-3A80-4914-9434-E61C5DD6DA31");
 
@@ -22,10 +24,11 @@ namespace C2C.Medium.Tcp
 
         public bool Connected => client.Connected;
 
-        public TcpConnect(IPEndPoint address)
+        public TcpConnect(IPEndPoint address, TimeSpan connectionCheckPeriod, TimeSpan readPeriod)
         {
             this.address = address;
-
+            this.connectionCheckPeriod = connectionCheckPeriod;
+            this.readPeriod = readPeriod;
             client = new TcpClient();
             cancelToken = new CancellationTokenSource();
         }
@@ -41,7 +44,7 @@ namespace C2C.Medium.Tcp
             {
                 while (!client.Connected && !cancelToken.IsCancellationRequested)
                 {
-                    Task.Delay(100).Wait(); // Wait 100ms to be connected
+                    Task.Delay(connectionCheckPeriod).Wait();
                 }
 
                 var stream = client.GetStream();
@@ -63,20 +66,20 @@ namespace C2C.Medium.Tcp
                         OnReceive(this, new RawPacketEventArgs(readBuffer));
                     }
 
-                    Task.Delay(100).Wait(); // Wait 10ms before reading next data
+                    Task.Delay(readPeriod).Wait(); // Wait 10ms before reading next data
                 }
             });
 
             return task;
         }
 
-        public void Transmit(byte[] buffer)
+        public void Transmit(byte[] rawPacket)
         {
             if (!client.Connected)
                 return;
 
-            Logging.Log("Sent {0} bytes.", buffer.Length);
-            client.GetStream().Write(buffer, 0, buffer.Length);
+            Logging.Log("Sent {0} bytes.", rawPacket.Length);
+            client.GetStream().Write(rawPacket, 0, rawPacket.Length);
         }
 
         protected virtual void Dispose(bool disposing)

@@ -27,14 +27,18 @@ namespace C2C.Medium.Http
         public bool Connected => true;
 
         private readonly IList<byte[]> pendingTransmitRequests = new List<byte[]>();
+        private readonly TimeSpan connectionCheckPeriod;
+        private readonly TimeSpan readPeriod;
 
-        public WebSocketBind(string[] prefixes)
+        public WebSocketBind(string[] prefixes, TimeSpan connectionCheckPeriod, TimeSpan readPeriod)
         {
             listener = new HttpListener();
             foreach (var prefix in prefixes)
                 listener.Prefixes.Add(prefix);
 
             cancelToken = new CancellationTokenSource();
+            this.connectionCheckPeriod = connectionCheckPeriod;
+            this.readPeriod = readPeriod;
         }
 
         public event EventHandler<RawPacketEventArgs> OnReceive;
@@ -63,7 +67,7 @@ namespace C2C.Medium.Http
 
                     // Wait for connection
                     while (socket.State == WebSocketState.Connecting && !cancelToken.IsCancellationRequested)
-                        await Task.Delay(100);
+                        await Task.Delay(connectionCheckPeriod);
 
                     Logging.Log("WebSocket connected.");
 
@@ -87,20 +91,21 @@ namespace C2C.Medium.Http
                         } while (!endOfData);
 
                         OnReceive(this, new RawPacketEventArgs(data.ToArray()));
+
+                        await Task.Delay(readPeriod); // Wait 10ms before reading next data
                     }
 
-                    await Task.Delay(100); // Wait 10ms before reading next data
                 });
             });
         }
 
-        public void Transmit(byte[] buffer)
+        public void Transmit(byte[] rawPacket)
         {
             if (socket == null || socket.State != WebSocketState.Open)
                 return;
 
-            Logging.Log("Transmit {0} bytes", buffer.Length);
-            Task.Run(async () => await socket.SendAsync(new ArraySegment<byte>(buffer), WebSocketMessageType.Binary, true, cancelToken.Token));
+            Logging.Log("Transmit {0} bytes", rawPacket.Length);
+            Task.Run(async () => await socket.SendAsync(new ArraySegment<byte>(rawPacket), WebSocketMessageType.Binary, true, cancelToken.Token));
         }
 
         protected virtual void Dispose(bool disposing)

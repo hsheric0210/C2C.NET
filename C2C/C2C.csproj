@@ -4,8 +4,12 @@
         <TargetFrameworks>net462;net6</TargetFrameworks>
     </PropertyGroup>
 
-    <ItemGroup>
-      <Reference Include="System.Net.Http" />
+    <ItemGroup Condition="'$(TargetFramework)' == 'net6'" >
+        <PackageReference Include="System.Net.Http" Version="4.3.4" />
+    </ItemGroup>
+
+    <ItemGroup Condition="'$(TargetFramework)' == 'net462'">
+        <Reference Include="System.Net.Http" />
     </ItemGroup>
 
 </Project>

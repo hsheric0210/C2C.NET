@@ -15,6 +15,8 @@ namespace C2C.Medium.Tcp
 
         private readonly CancellationTokenSource cancelToken;
         private readonly Uri address;
+        private readonly TimeSpan connectionCheckPeriod;
+        private readonly TimeSpan readPeriod;
 
         public Guid MediumID => Guid.Parse("60C0C6A8-9066-417A-BFF4-9D8AFECC2D93");
 
@@ -24,10 +26,11 @@ namespace C2C.Medium.Tcp
 
         public bool Connected => socket.State == WebSocketState.Open;
 
-        public WebSocketConnect(Uri address)
+        public WebSocketConnect(Uri address, TimeSpan connectionCheckPeriod, TimeSpan readPeriod)
         {
             this.address = address;
-
+            this.connectionCheckPeriod = connectionCheckPeriod;
+            this.readPeriod = readPeriod;
             socket = new ClientWebSocket();
             socket.Options.AddSubProtocol("null");
             cancelToken = new CancellationTokenSource();
@@ -43,7 +46,7 @@ namespace C2C.Medium.Tcp
             _ = Task.Run(async () =>
             {
                 while (!Connected && !cancelToken.IsCancellationRequested)
-                    Task.Delay(100).Wait(); // Wait 100ms to be connected
+                    Task.Delay(connectionCheckPeriod).Wait();
 
                 while (!cancelToken.IsCancellationRequested)
                 {
@@ -65,6 +68,7 @@ namespace C2C.Medium.Tcp
                     } while (!endOfData);
 
                     OnReceive(this, new RawPacketEventArgs(data.ToArray()));
+                    Task.Delay(readPeriod).Wait();
                 }
             });
         }

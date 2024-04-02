@@ -45,7 +45,6 @@ namespace C2C
         private IProcessor[] processorsReversed;
 
         private bool enableProcessors = false;
-        private bool disposedValue;
 
         private readonly ConcurrentDictionary<Guid, TaskCompletionSource<byte[]>> receiveHandlerQueue
             = new ConcurrentDictionary<Guid, TaskCompletionSource<byte[]>>();

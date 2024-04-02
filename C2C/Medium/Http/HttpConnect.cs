@@ -80,11 +80,11 @@ namespace C2C.Medium.Http
             return Task.CompletedTask;
         }
 
-        public void Transmit(byte[] buffer)
+        public void Transmit(byte[] rawPacket)
         {
-            Logging.Log("Sent {0} bytes.", buffer.Length);
+            Logging.Log("Sent {0} bytes.", rawPacket.Length);
 
-            var content = new ByteArrayContent(buffer);
+            var content = new ByteArrayContent(rawPacket);
             Task.Run(async () => await client.PostAsync(address, content));
         }
 

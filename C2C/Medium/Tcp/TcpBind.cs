@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
@@ -13,6 +14,8 @@ namespace C2C.Medium.Tcp
         private bool disposedValue;
 
         private readonly CancellationTokenSource cancelToken;
+        private readonly TimeSpan connectionAcceptPeriod;
+        private readonly TimeSpan readPeriod;
 
         public Guid MediumID => Guid.Parse("76613C01-640A-4550-88A7-DA174BF21163");
 
@@ -22,10 +25,12 @@ namespace C2C.Medium.Tcp
 
         public bool Connected => client?.Connected == true;
 
-        public TcpBind(IPEndPoint address)
+        public TcpBind(IPEndPoint address, TimeSpan connectionAcceptPeriod, TimeSpan readPeriod)
         {
             listener = new TcpListener(address);
             cancelToken = new CancellationTokenSource();
+            this.connectionAcceptPeriod = connectionAcceptPeriod;
+            this.readPeriod = readPeriod;
         }
 
         public event EventHandler<RawPacketEventArgs> OnReceive;
@@ -38,12 +43,12 @@ namespace C2C.Medium.Tcp
             return Task.Run(() =>
             {
                 while (!listener.Pending())
-                    Task.Delay(100).Wait(); // Wait 100ms before retrying
+                    Task.Delay(connectionAcceptPeriod).Wait();
 
                 client = listener.AcceptTcpClient();
                 Logging.Log("Pending connection accepted.");
 
-                // Socket Reader Thread
+                // Start the socket reader thread
                 Task.Run(() =>
                 {
                     Logging.Log("Reader thread started.");
@@ -66,16 +71,16 @@ namespace C2C.Medium.Tcp
                             OnReceive(this, new RawPacketEventArgs(readBuffer));
                         }
 
-                        Task.Delay(100).Wait(); // Wait 10ms before reading next data
+                        Task.Delay(readPeriod).Wait();
                     }
                 });
             });
         }
 
-        public void Transmit(byte[] buffer)
+        public void Transmit(byte[] rawPacket)
         {
-            Logging.Log("Transmit data: {0} bytes", buffer.Length);
-            client.GetStream().Write(buffer, 0, buffer.Length);
+            Logging.Log("Transmit data: {0} bytes", rawPacket.Length);
+            client.GetStream().Write(rawPacket, 0, rawPacket.Length);
         }
 
         protected virtual void Dispose(bool disposing)

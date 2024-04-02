@@ -93,10 +93,10 @@ namespace C2C.Medium.Http
             return Task.CompletedTask;
         }
 
-        public void Transmit(byte[] buffer)
+        public void Transmit(byte[] rawPacket)
         {
-            Logging.Log("Enqueued transmit data request: {0} bytes", buffer.Length);
-            pendingTransmitRequests.Add(buffer);
+            Logging.Log("Enqueued transmit data request: {0} bytes", rawPacket.Length);
+            pendingTransmitRequests.Add(rawPacket);
         }
 
         protected virtual void Dispose(bool disposing)

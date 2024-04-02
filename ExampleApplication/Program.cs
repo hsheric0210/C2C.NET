@@ -55,7 +55,7 @@ namespace ExampleApplication
                     Console.WriteLine("[+] Using TCP Bind mode.");
                     if (!IPEndPoint.TryParse(options.Address, out var address))
                         throw new ArgumentException(options.Address + " is not a valid ip endpoint");
-                    medium = new TcpBind(address);
+                    medium = new TcpBind(address, TimeSpan.FromMilliseconds(100), TimeSpan.FromMilliseconds(50));
                     break;
                 }
                 case "tcp_connect":
@@ -63,7 +63,7 @@ namespace ExampleApplication
                     Console.WriteLine("[+] Using TCP Connect mode.");
                     if (!IPEndPoint.TryParse(options.Address, out var address))
                         throw new ArgumentException(options.Address + " is not a valid ip endpoint");
-                    medium = new TcpConnect(address);
+                    medium = new TcpConnect(address, TimeSpan.FromMilliseconds(100), TimeSpan.FromMilliseconds(50));
                     break;
                 }
                 case "http_bind":
@@ -77,13 +77,13 @@ namespace ExampleApplication
                     Console.WriteLine("[+] Using HTTP Connect mode.");
                     if (!Uri.TryCreate(options.Address, new UriCreationOptions { DangerousDisablePathAndQueryCanonicalization = false }, out var uri))
                         throw new ArgumentException(options.Address + " is not a valid URI");
-                    medium = new HttpConnect(uri, TimeSpan.FromSeconds(3));
+                    medium = new HttpConnect(uri, TimeSpan.FromSeconds(1));
                     break;
                 }
                 case "ws_bind":
                 {
                     Console.WriteLine("[+] Using WebSocket Bind mode.");
-                    medium = new WebSocketBind(new string[] { options.Address });
+                    medium = new WebSocketBind(new string[] { options.Address }, TimeSpan.FromMilliseconds(100), TimeSpan.FromMilliseconds(50));
                     break;
                 }
                 case "ws_connect":
@@ -91,7 +91,7 @@ namespace ExampleApplication
                     Console.WriteLine("[+] Using WebSocket Connect mode.");
                     if (!Uri.TryCreate(options.Address, new UriCreationOptions { DangerousDisablePathAndQueryCanonicalization = false }, out var uri))
                         throw new ArgumentException(options.Address + " is not a valid URI");
-                    medium = new WebSocketConnect(uri);
+                    medium = new WebSocketConnect(uri, TimeSpan.FromMilliseconds(100), TimeSpan.FromMilliseconds(50));
                     break;
                 }
                 default:
